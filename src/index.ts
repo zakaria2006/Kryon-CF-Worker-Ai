@@ -1,4 +1,262 @@
-// src/index.ts
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+// node_modules/unenv/dist/runtime/_internal/utils.mjs
+// @__NO_SIDE_EFFECTS__
+function createNotImplementedError(name) {
+  return new Error(`[unenv] ${name} is not implemented yet!`);
+}
+__name(createNotImplementedError, "createNotImplementedError");
+
+// node_modules/unenv/dist/runtime/node/internal/perf_hooks/performance.mjs
+var _timeOrigin = globalThis.performance?.timeOrigin ?? Date.now();
+var _performanceNow = globalThis.performance?.now ? globalThis.performance.now.bind(globalThis.performance) : () => Date.now() - _timeOrigin;
+var nodeTiming = {
+  name: "node",
+  entryType: "node",
+  startTime: 0,
+  duration: 0,
+  nodeStart: 0,
+  v8Start: 0,
+  bootstrapComplete: 0,
+  environment: 0,
+  loopStart: 0,
+  loopExit: 0,
+  idleTime: 0,
+  uvMetricsInfo: {
+    loopCount: 0,
+    events: 0,
+    eventsWaiting: 0
+  },
+  detail: void 0,
+  toJSON() {
+    return this;
+  }
+};
+var PerformanceEntry = class {
+  static {
+    __name(this, "PerformanceEntry");
+  }
+  __unenv__ = true;
+  detail;
+  entryType = "event";
+  name;
+  startTime;
+  constructor(name, options) {
+    this.name = name;
+    this.startTime = options?.startTime || _performanceNow();
+    this.detail = options?.detail;
+  }
+  get duration() {
+    return _performanceNow() - this.startTime;
+  }
+  toJSON() {
+    return {
+      name: this.name,
+      entryType: this.entryType,
+      startTime: this.startTime,
+      duration: this.duration,
+      detail: this.detail
+    };
+  }
+};
+var PerformanceMark = class PerformanceMark2 extends PerformanceEntry {
+  static {
+    __name(this, "PerformanceMark");
+  }
+  entryType = "mark";
+  constructor() {
+    super(...arguments);
+  }
+  get duration() {
+    return 0;
+  }
+};
+var PerformanceMeasure = class extends PerformanceEntry {
+  static {
+    __name(this, "PerformanceMeasure");
+  }
+  entryType = "measure";
+};
+var PerformanceResourceTiming = class extends PerformanceEntry {
+  static {
+    __name(this, "PerformanceResourceTiming");
+  }
+  entryType = "resource";
+  serverTiming = [];
+  connectEnd = 0;
+  connectStart = 0;
+  decodedBodySize = 0;
+  domainLookupEnd = 0;
+  domainLookupStart = 0;
+  encodedBodySize = 0;
+  fetchStart = 0;
+  initiatorType = "";
+  name = "";
+  nextHopProtocol = "";
+  redirectEnd = 0;
+  redirectStart = 0;
+  requestStart = 0;
+  responseEnd = 0;
+  responseStart = 0;
+  secureConnectionStart = 0;
+  startTime = 0;
+  transferSize = 0;
+  workerStart = 0;
+  responseStatus = 0;
+};
+var PerformanceObserverEntryList = class {
+  static {
+    __name(this, "PerformanceObserverEntryList");
+  }
+  __unenv__ = true;
+  getEntries() {
+    return [];
+  }
+  getEntriesByName(_name, _type) {
+    return [];
+  }
+  getEntriesByType(type) {
+    return [];
+  }
+};
+var Performance = class {
+  static {
+    __name(this, "Performance");
+  }
+  __unenv__ = true;
+  timeOrigin = _timeOrigin;
+  eventCounts = /* @__PURE__ */ new Map();
+  _entries = [];
+  _resourceTimingBufferSize = 0;
+  navigation = void 0;
+  timing = void 0;
+  timerify(_fn, _options) {
+    throw createNotImplementedError("Performance.timerify");
+  }
+  get nodeTiming() {
+    return nodeTiming;
+  }
+  eventLoopUtilization() {
+    return {};
+  }
+  markResourceTiming() {
+    return new PerformanceResourceTiming("");
+  }
+  onresourcetimingbufferfull = null;
+  now() {
+    if (this.timeOrigin === _timeOrigin) {
+      return _performanceNow();
+    }
+    return Date.now() - this.timeOrigin;
+  }
+  clearMarks(markName) {
+    this._entries = markName ? this._entries.filter((e) => e.name !== markName) : this._entries.filter((e) => e.entryType !== "mark");
+  }
+  clearMeasures(measureName) {
+    this._entries = measureName ? this._entries.filter((e) => e.name !== measureName) : this._entries.filter((e) => e.entryType !== "measure");
+  }
+  clearResourceTimings() {
+    this._entries = this._entries.filter((e) => e.entryType !== "resource" || e.entryType !== "navigation");
+  }
+  getEntries() {
+    return this._entries;
+  }
+  getEntriesByName(name, type) {
+    return this._entries.filter((e) => e.name === name && (!type || e.entryType === type));
+  }
+  getEntriesByType(type) {
+    return this._entries.filter((e) => e.entryType === type);
+  }
+  mark(name, options) {
+    const entry = new PerformanceMark(name, options);
+    this._entries.push(entry);
+    return entry;
+  }
+  measure(measureName, startOrMeasureOptions, endMark) {
+    let start;
+    let end;
+    if (typeof startOrMeasureOptions === "string") {
+      start = this.getEntriesByName(startOrMeasureOptions, "mark")[0]?.startTime;
+      end = this.getEntriesByName(endMark, "mark")[0]?.startTime;
+    } else {
+      start = Number.parseFloat(startOrMeasureOptions?.start) || this.now();
+      end = Number.parseFloat(startOrMeasureOptions?.end) || this.now();
+    }
+    const entry = new PerformanceMeasure(measureName, {
+      startTime: start,
+      detail: {
+        start,
+        end
+      }
+    });
+    this._entries.push(entry);
+    return entry;
+  }
+  setResourceTimingBufferSize(maxSize) {
+    this._resourceTimingBufferSize = maxSize;
+  }
+  addEventListener(type, listener, options) {
+    throw createNotImplementedError("Performance.addEventListener");
+  }
+  removeEventListener(type, listener, options) {
+    throw createNotImplementedError("Performance.removeEventListener");
+  }
+  dispatchEvent(event) {
+    throw createNotImplementedError("Performance.dispatchEvent");
+  }
+  toJSON() {
+    return this;
+  }
+};
+var PerformanceObserver = class {
+  static {
+    __name(this, "PerformanceObserver");
+  }
+  __unenv__ = true;
+  static supportedEntryTypes = [];
+  _callback = null;
+  constructor(callback) {
+    this._callback = callback;
+  }
+  takeRecords() {
+    return [];
+  }
+  disconnect() {
+    throw createNotImplementedError("PerformanceObserver.disconnect");
+  }
+  observe(options) {
+    throw createNotImplementedError("PerformanceObserver.observe");
+  }
+  bind(fn) {
+    return fn;
+  }
+  runInAsyncScope(fn, thisArg, ...args) {
+    return fn.call(thisArg, ...args);
+  }
+  asyncId() {
+    return 0;
+  }
+  triggerAsyncId() {
+    return 0;
+  }
+  emitDestroy() {
+    return this;
+  }
+};
+var performance = globalThis.performance && "addEventListener" in globalThis.performance ? globalThis.performance : new Performance();
+
+// node_modules/@cloudflare/unenv-preset/dist/runtime/polyfill/performance.mjs
+globalThis.performance = performance;
+globalThis.Performance = Performance;
+globalThis.PerformanceEntry = PerformanceEntry;
+globalThis.PerformanceMark = PerformanceMark;
+globalThis.PerformanceMeasure = PerformanceMeasure;
+globalThis.PerformanceObserver = PerformanceObserver;
+globalThis.PerformanceObserverEntryList = PerformanceObserverEntryList;
+globalThis.PerformanceResourceTiming = PerformanceResourceTiming;
+
+// worker.js
 var DEFAULT_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 var DEFAULT_AUGMENT_MODEL = "@cf/runwayml/stable-diffusion-v1-5-img2img";
 var DEFAULT_INPAINT_MODEL = "@cf/runwayml/stable-diffusion-v1-5-inpainting";
@@ -196,6 +454,7 @@ function jsonResponse(payload, status = 200) {
     }
   });
 }
+__name(jsonResponse, "jsonResponse");
 function authorizeRequest(request, env) {
   const configuredToken = (env.APP_AUTH_TOKEN || "").trim();
   if (!configuredToken) {
@@ -223,6 +482,7 @@ function authorizeRequest(request, env) {
   }
   return null;
 }
+__name(authorizeRequest, "authorizeRequest");
 function clampInt(value, min, max, fallback) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return fallback;
@@ -232,6 +492,7 @@ function clampInt(value, min, max, fallback) {
   if (v > max) return max;
   return v;
 }
+__name(clampInt, "clampInt");
 function clampFloat(value, min, max, fallback) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return fallback;
@@ -240,6 +501,7 @@ function clampFloat(value, min, max, fallback) {
   if (value > max) return max;
   return value;
 }
+__name(clampFloat, "clampFloat");
 function normalizeBase64(value) {
   if (typeof value !== "string") return "";
   const trimmed = value.trim();
@@ -248,27 +510,36 @@ function normalizeBase64(value) {
   const commaIndex = trimmed.indexOf(",");
   return commaIndex >= 0 ? trimmed.slice(commaIndex + 1).trim() : "";
 }
+__name(normalizeBase64, "normalizeBase64");
 function isFluxSchnell(model) {
   return model.toLowerCase() === "@cf/black-forest-labs/flux-1-schnell";
 }
+__name(isFluxSchnell, "isFluxSchnell");
 function isFlux2Model(model) {
   const normalized = model.toLowerCase();
   return normalized.startsWith("@cf/black-forest-labs/flux-2-");
 }
+__name(isFlux2Model, "isFlux2Model");
 function isInpaintingModel(model) {
   return model.toLowerCase().includes("inpainting");
 }
+__name(isInpaintingModel, "isInpaintingModel");
 function isImageToImageModel(model) {
   const normalized = model.toLowerCase();
   return normalized.includes("img2img") || normalized.includes("inpainting") || normalized.includes("dreamshaper-8-lcm");
 }
+__name(isImageToImageModel, "isImageToImageModel");
 function isTextToImageOnlyModel(model) {
   const normalized = model.toLowerCase();
   return normalized.includes("phoenix-1.0") || isFluxSchnell(model);
 }
+__name(isTextToImageOnlyModel, "isTextToImageOnlyModel");
 function resolveModel(requestedModel, hasSourceImage, hasMaskImage) {
   if (!hasSourceImage) {
     return isImageToImageModel(requestedModel) ? DEFAULT_MODEL : requestedModel;
+  }
+  if (isFlux2Model(requestedModel)) {
+    return hasMaskImage ? DEFAULT_INPAINT_MODEL : DEFAULT_AUGMENT_MODEL;
   }
   if (hasMaskImage) {
     return isInpaintingModel(requestedModel) ? requestedModel : DEFAULT_INPAINT_MODEL;
@@ -284,6 +555,7 @@ function resolveModel(requestedModel, hasSourceImage, hasMaskImage) {
   }
   return requestedModel;
 }
+__name(resolveModel, "resolveModel");
 function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputImages, maskImageBase64, img2ImgEncoding = "base64") {
   const width = clampInt(body.width, 256, 2048, 1024);
   const height = clampInt(body.height, 256, 2048, 1024);
@@ -308,8 +580,6 @@ function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputIma
   if (isInpaintingModel(model) && sourceImageBase64) {
     const aiInput2 = {
       prompt,
-      width,
-      height,
       strength: clampFloat(body.strength, 0.05, 1, 0.72)
     };
     if (maskImageBase64) {
@@ -328,8 +598,6 @@ function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputIma
   if (isImageToImageModel(model) && sourceImageBase64) {
     const aiInput2 = {
       prompt,
-      width,
-      height,
       strength: clampFloat(body.strength, 0.05, 1, 0.72)
     };
     if (img2ImgEncoding === "bytes") {
@@ -357,7 +625,9 @@ function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputIma
   }
   return aiInput;
 }
+__name(buildAiInput, "buildAiInput");
 function buildAiRunPlan(body, prompt, model, sourceImageBase64, additionalInputImages, maskImageBase64) {
+  const preferBytesInput = shouldUseAlternateImg2ImgInput(model, sourceImageBase64);
   const primaryInput = buildAiInput(
     body,
     prompt,
@@ -365,9 +635,9 @@ function buildAiRunPlan(body, prompt, model, sourceImageBase64, additionalInputI
     sourceImageBase64,
     additionalInputImages,
     maskImageBase64,
-    "base64"
+    preferBytesInput ? "bytes" : "base64"
   );
-  if (!shouldUseAlternateImg2ImgInput(model, sourceImageBase64)) {
+  if (!preferBytesInput) {
     return { primaryInput };
   }
   return {
@@ -379,13 +649,15 @@ function buildAiRunPlan(body, prompt, model, sourceImageBase64, additionalInputI
       sourceImageBase64,
       additionalInputImages,
       maskImageBase64,
-      "bytes"
+      "base64"
     )
   };
 }
+__name(buildAiRunPlan, "buildAiRunPlan");
 function shouldUseAlternateImg2ImgInput(model, sourceImageBase64) {
   return isImageToImageModel(model) && !isFlux2Model(model) && sourceImageBase64 !== "";
 }
+__name(shouldUseAlternateImg2ImgInput, "shouldUseAlternateImg2ImgInput");
 async function runWorkersAI(ai, model, plan) {
   try {
     return await ai.run(model, plan.primaryInput);
@@ -402,16 +674,19 @@ async function runWorkersAI(ai, model, plan) {
     }
   }
 }
+__name(runWorkersAI, "runWorkersAI");
 function shouldRetryWithAlternateImg2ImgInput(error) {
   void error;
   return true;
 }
+__name(shouldRetryWithAlternateImg2ImgInput, "shouldRetryWithAlternateImg2ImgInput");
 function getErrorMessage(error) {
   if (error instanceof Error && error.message) {
     return error.message;
   }
   return String(error);
 }
+__name(getErrorMessage, "getErrorMessage");
 function normalizeSourceMimeType(value) {
   if (typeof value !== "string") {
     return "image/png";
@@ -425,6 +700,7 @@ function normalizeSourceMimeType(value) {
   }
   return "image/png";
 }
+__name(normalizeSourceMimeType, "normalizeSourceMimeType");
 function normalizeInputImages(value) {
   if (!Array.isArray(value)) {
     return [];
@@ -444,6 +720,7 @@ function normalizeInputImages(value) {
     };
   }).filter((entry) => entry !== null).slice(0, MAX_FLUX2_INPUT_IMAGES);
 }
+__name(normalizeInputImages, "normalizeInputImages");
 function resolveSceneImageDataUrl(body) {
   const direct = typeof body.image_data_url === "string" ? body.image_data_url.trim() : "";
   if (direct.startsWith("data:image/")) {
@@ -460,6 +737,7 @@ function resolveSceneImageDataUrl(body) {
   const mime = normalizeSourceMimeType(body.image_mime);
   return `data:${mime};base64,${base64Value}`;
 }
+__name(resolveSceneImageDataUrl, "resolveSceneImageDataUrl");
 function buildSceneMaterialPrompt(maxMaterials) {
   return [
     "You are a vision system that extracts PBR-ready material regions from a single interior scene image.",
@@ -477,6 +755,7 @@ function buildSceneMaterialPrompt(maxMaterials) {
     "- No extra keys and no markdown. JSON only."
   ].join("\n");
 }
+__name(buildSceneMaterialPrompt, "buildSceneMaterialPrompt");
 async function handleSceneMaterialsRequest(request, env) {
   let body;
   try {
@@ -585,6 +864,7 @@ async function handleSceneMaterialsRequest(request, env) {
     );
   }
 }
+__name(handleSceneMaterialsRequest, "handleSceneMaterialsRequest");
 async function handleSceneAgreeRequest(env) {
   try {
     await env.AI.run(DEFAULT_VISION_MODEL, {
@@ -611,6 +891,7 @@ async function handleSceneAgreeRequest(env) {
     );
   }
 }
+__name(handleSceneAgreeRequest, "handleSceneAgreeRequest");
 function parseSceneMaterialsFromOutput(out) {
   if (out && typeof out === "object") {
     const record = out;
@@ -639,6 +920,7 @@ function parseSceneMaterialsFromOutput(out) {
   }
   return null;
 }
+__name(parseSceneMaterialsFromOutput, "parseSceneMaterialsFromOutput");
 function parseSceneMaterials(text) {
   if (!text || typeof text !== "string") return null;
   const payload = extractJsonPayload(text);
@@ -647,6 +929,7 @@ function parseSceneMaterials(text) {
   if (!Array.isArray(record.materials)) return null;
   return { materials: record.materials };
 }
+__name(parseSceneMaterials, "parseSceneMaterials");
 function extractJsonPayload(text) {
   const trimmed = text.trim();
   if (!trimmed) return null;
@@ -662,6 +945,7 @@ function extractJsonPayload(text) {
     return null;
   }
 }
+__name(extractJsonPayload, "extractJsonPayload");
 function extractJsonFence(text) {
   const fenceStart = text.indexOf("```");
   if (fenceStart === -1) return null;
@@ -669,6 +953,7 @@ function extractJsonFence(text) {
   if (fenceEnd === -1) return null;
   return text.slice(fenceStart + 3, fenceEnd).replace(/^json/i, "").trim();
 }
+__name(extractJsonFence, "extractJsonFence");
 function normalizeMaterialType(value) {
   if (typeof value !== "string") return "";
   const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_");
@@ -678,11 +963,13 @@ function normalizeMaterialType(value) {
   }
   return MATERIAL_TYPE_ALIASES[normalized] || "";
 }
+__name(normalizeMaterialType, "normalizeMaterialType");
 function bboxArea(bbox) {
   const width = Math.max(0, bbox[2] - bbox[0]);
   const height = Math.max(0, bbox[3] - bbox[1]);
   return width * height;
 }
+__name(bboxArea, "bboxArea");
 function sanitizeSceneMaterials(input, maxMaterials) {
   const results = [];
   for (const entry of input.materials) {
@@ -705,6 +992,7 @@ function sanitizeSceneMaterials(input, maxMaterials) {
   }
   return results;
 }
+__name(sanitizeSceneMaterials, "sanitizeSceneMaterials");
 function normalizeBbox(value) {
   if (!Array.isArray(value) || value.length < 4) return null;
   const numbers = value.slice(0, 4).map((item) => {
@@ -714,6 +1002,7 @@ function normalizeBbox(value) {
   if (numbers[0] >= numbers[2] || numbers[1] >= numbers[3]) return null;
   return numbers;
 }
+__name(normalizeBbox, "normalizeBbox");
 function buildFlux2MultipartInput(prompt, width, height, seed, inputImages) {
   const form = new FormData();
   form.append("prompt", prompt);
@@ -733,6 +1022,7 @@ function buildFlux2MultipartInput(prompt, width, height, seed, inputImages) {
     }
   };
 }
+__name(buildFlux2MultipartInput, "buildFlux2MultipartInput");
 function appendFlux2InputImage(form, index, image) {
   const bytes = base64ToBytes(image.base64);
   form.append(
@@ -741,11 +1031,13 @@ function appendFlux2InputImage(form, index, image) {
     getFlux2InputFilename(index, image.mime)
   );
 }
+__name(appendFlux2InputImage, "appendFlux2InputImage");
 function getFlux2InputFilename(index, mimeType) {
   if (mimeType === "image/jpeg") return `input-${index}.jpg`;
   if (mimeType === "image/webp") return `input-${index}.webp`;
   return `input-${index}.png`;
 }
+__name(getFlux2InputFilename, "getFlux2InputFilename");
 async function extractImageResult(out) {
   const direct = extractDirectImageResult(out);
   if (direct.imageBase64) {
@@ -756,6 +1048,7 @@ async function extractImageResult(out) {
   }
   return { imageBase64: "", mime: "" };
 }
+__name(extractImageResult, "extractImageResult");
 function extractDirectImageResult(out) {
   if (!out || typeof out !== "object") {
     return { imageBase64: "", mime: "" };
@@ -781,6 +1074,7 @@ function extractDirectImageResult(out) {
   }
   return { imageBase64: "", mime: "" };
 }
+__name(extractDirectImageResult, "extractDirectImageResult");
 async function readBinaryImage(out) {
   const response = out instanceof Response ? out : new Response(out);
   const buffer = await response.arrayBuffer();
@@ -792,6 +1086,7 @@ async function readBinaryImage(out) {
     mime: response.headers.get("content-type") || "image/png"
   };
 }
+__name(readBinaryImage, "readBinaryImage");
 function bytesToBase64(bytes) {
   let binary = "";
   const chunkSize = 32768;
@@ -801,6 +1096,7 @@ function bytesToBase64(bytes) {
   }
   return btoa(binary);
 }
+__name(bytesToBase64, "bytesToBase64");
 function base64ToBytes(base64) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -809,6 +1105,9 @@ function base64ToBytes(base64) {
   }
   return bytes;
 }
+__name(base64ToBytes, "base64ToBytes");
 export {
   index_default as default
 };
+//# sourceMappingURL=worker.js.map
+//# sourceMappingURL=worker.js.map
