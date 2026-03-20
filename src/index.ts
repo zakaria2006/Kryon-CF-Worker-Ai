@@ -583,12 +583,16 @@ function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputIma
       strength: clampFloat(body.strength, 0.05, 1, 0.72)
     };
     if (maskImageBase64) {
-      aiInput2.mask = Array.from(base64ToBytes(maskImageBase64));
+      if (img2ImgEncoding === "bytes") {
+        aiInput2.mask = Array.from(base64ToBytes(maskImageBase64));
+      } else {
+        aiInput2.mask = maskImageBase64;
+      }
     }
     if (img2ImgEncoding === "bytes") {
       aiInput2.image = Array.from(base64ToBytes(sourceImageBase64));
     } else {
-      aiInput2.image_b64 = sourceImageBase64;
+      aiInput2.image = sourceImageBase64;
     }
     if (seed !== null) {
       aiInput2.seed = seed;
@@ -603,7 +607,7 @@ function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputIma
     if (img2ImgEncoding === "bytes") {
       aiInput2.image = Array.from(base64ToBytes(sourceImageBase64));
     } else {
-      aiInput2.image_b64 = sourceImageBase64;
+      aiInput2.image = sourceImageBase64;
     }
     if (seed !== null) {
       aiInput2.seed = seed;
@@ -627,7 +631,7 @@ function buildAiInput(body, prompt, model, sourceImageBase64, additionalInputIma
 }
 __name(buildAiInput, "buildAiInput");
 function buildAiRunPlan(body, prompt, model, sourceImageBase64, additionalInputImages, maskImageBase64) {
-  const preferBytesInput = shouldUseAlternateImg2ImgInput(model, sourceImageBase64);
+  const shouldTryBytesFallback = shouldUseAlternateImg2ImgInput(model, sourceImageBase64);
   const primaryInput = buildAiInput(
     body,
     prompt,
@@ -635,9 +639,9 @@ function buildAiRunPlan(body, prompt, model, sourceImageBase64, additionalInputI
     sourceImageBase64,
     additionalInputImages,
     maskImageBase64,
-    preferBytesInput ? "bytes" : "base64"
+    "base64"
   );
-  if (!preferBytesInput) {
+  if (!shouldTryBytesFallback) {
     return { primaryInput };
   }
   return {
@@ -649,7 +653,7 @@ function buildAiRunPlan(body, prompt, model, sourceImageBase64, additionalInputI
       sourceImageBase64,
       additionalInputImages,
       maskImageBase64,
-      "base64"
+      "bytes"
     )
   };
 }
@@ -1109,5 +1113,4 @@ __name(base64ToBytes, "base64ToBytes");
 export {
   index_default as default
 };
-//# sourceMappingURL=worker.js.map
 //# sourceMappingURL=worker.js.map
