@@ -1,5 +1,27 @@
 {
-  "devDependencies": {
-    "wrangler": "^4.73.0"
-  }
+	"name": "kryon-ai-worker",
+	"version": "0.1.0",
+	"private": true,
+	"cloudflare": {
+		"bindings": {
+			"APP_AUTH_TOKEN": {
+				"description": "Paste the APP_AUTH_TOKEN generated in Kryon Settings. Kryon sends this as a Bearer token to protect your worker endpoint."
+			}
+		}
+	},
+	"scripts": {
+		"build": "esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=worker.js",
+		"deploy": "npm run build && wrangler deploy",
+		"dev": "npm run build && wrangler dev",
+		"start": "npm run build && wrangler dev",
+		"test": "vitest",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.12.4",
+		"@types/node": "^25.3.3",
+		"typescript": "^5.5.2",
+		"vitest": "~3.2.0",
+		"wrangler": "^4.70.0"
+	}
 }
